@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>QuPath Setup and Filename Metadata Conventions</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">QuPath Setup and Filename Metadata
+Conventions</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>A key strength of <code>drugsens</code> is that it eliminates manual
+spreadsheet curation: experimental metadata (patient ID, tissue origin,
+experiment date, sample collection date, single or combination drug
+names, concentrations, units, and replicate status) is automatically
+parsed from the <code>Image</code> column exported by
+<strong>QuPath</strong>.</p>
+<p>This guide walks through:</p>
+<ol style="list-style-type: decimal">
+<li>Generating the QuPath Groovy export script
+(<code>generate_qupath_script()</code>).</li>
+<li>Structuring image filenames for single drugs, drug combinations, and
+vehicle controls.</li>
+<li>Testing filename metadata extraction directly in R
+(<code>string_parsing()</code>).</li>
+<li>Configuring cell marker relabeling
+(<code>make_run_config()</code>).</li>
+</ol>
+<hr />
+</div>
+<div id="generating-and-running-the-qupath-groovy-scripts" class="section level2">
+<h2>1. Generating and Running the QuPath Groovy Scripts</h2>
+<p>Run <code>generate_qupath_script()</code> in R to create a
+ready-to-use Groovy export template
+(<code>script_for_qupath.txt</code>):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(drugsens)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>out_dir <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">generate_qupath_script</span>(<span class="at">output_dir =</span> out_dir)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>script_lines <span class="ot">&lt;-</span> <span class="fu">readLines</span>(<span class="fu">file.path</span>(out_dir, <span class="st">&quot;script_for_qupath.txt&quot;</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">cat</span>( <span class="fu">paste</span>(<span class="fu">head</span>(script_lines, <span class="dv">25</span>), <span class="at">collapse =</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>) )</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; //This code script was tested with QuPath 4</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; import qupath.lib.gui.tools.MeasurementExporter</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; import qupath.lib.objects.PathCellObject</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; import qupath.lib.objects.PathDetectionObject</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; // Get the list of all images in the current project</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; def project = getProject()</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; def imagesToExport = project.getImageList()</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; // Separate each measurement value in the output file with a tab (&quot;  &quot;)</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; def separator = &quot;,&quot;</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; // Choose the columns that will be included in the export</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt; // Note: if columnsToInclude is empty, all columns will be included</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; def columnsToInclude = new String[]{&quot;Image&quot;, &quot;Name&quot;, &quot;Class&quot;,&quot;Centroid X um&quot;,&quot;Centroid Y um&quot;,&quot;Nucleus: Area&quot;, &quot;Nucleus: DAPI mean&quot;,&quot;Nucleus: E-Cadherin mean&quot;, &quot;Nucleus: Cleaved caspase 3 mean&quot;, &quot;Cell: Area&quot;,&quot;Cell: E-Cadherin mean&quot;, &quot;Cell: Cleaved caspase 3 mean&quot;,&quot;Cytoplasm: E-Cadherin mean&quot;,&quot;Cytoplasm: Cleaved caspase 3 mean&quot;,&quot;Nucleus/Cell area ratio&quot;}</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; // Choose the type of objects that the export will process</span></span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt; // Other possibilities include:</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; //    1. PathAnnotationObject</span></span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a><span class="co">#&gt; //    2. PathDetectionObject</span></span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="co">#&gt; //    3. PathRootObject</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a><span class="co">#&gt; // Note: import statements should then be modified accordingly</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="co">#&gt; def exportType = PathCellObject.class</span></span></code></pre></div>
+<div id="how-to-add-and-run-scripts-in-qupath-v0.4-v0.5" class="section level3">
+<h3>How to Add and Run Scripts in QuPath (v0.4 / v0.5+)</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Open the Script Editor</strong>: In QuPath’s top menu bar,
+select <strong><code>Automate</code> <span class="math inline">\(\rightarrow\)</span>
+<code>Show script editor</code></strong> (<code>Ctrl + [</code> on
+Windows/Linux, <code>Cmd + [</code> on macOS).</li>
+<li><strong>Step A — Cell Detection &amp; Classification
+Script</strong>:
+<ul>
+<li>Click <strong><code>File</code> <span class="math inline">\(\rightarrow\)</span> <code>New</code></strong> in
+the Script Editor and paste the cell detection &amp; object
+classification script from the <a href="https://github.com/flalom/drugsens#qupath-scripts">package
+README</a> (or save it in your project’s <code>scripts/</code> folder so
+it appears under <strong><code>Automate</code> <span class="math inline">\(\rightarrow\)</span>
+<code>Project scripts</code></strong>).</li>
+<li>Run it across all images in your project via
+<strong><code>Run</code> <span class="math inline">\(\rightarrow\)</span>
+<code>Run for project</code></strong> in the Script Editor menu.</li>
+</ul></li>
+<li><strong>Step B — Measurement Export Script
+(<code>script_for_qupath.txt</code>)</strong>:
+<ul>
+<li>In the Script Editor, click <strong><code>File</code> <span class="math inline">\(\rightarrow\)</span> <code>Open...</code></strong>
+and select the <code>script_for_qupath.txt</code> file generated by
+<code>generate_qupath_script()</code> (or paste it into a new tab via
+<strong><code>File</code> <span class="math inline">\(\rightarrow\)</span>
+<code>New</code></strong>).</li>
+<li>Replace the <code>&lt;...&gt;</code> placeholders in
+<code>outputPath</code> with your sample metadata.</li>
+<li>Click <strong><code>Run</code> <span class="math inline">\(\rightarrow\)</span> <code>Run</code></strong>
+(<code>Ctrl + R</code> / <code>Cmd + R</code>). Because
+<code>MeasurementExporter</code> already loops over
+<code>getProject().getImageList()</code>, a single
+<strong><code>Run</code> <span class="math inline">\(\rightarrow\)</span> <code>Run</code></strong>
+exports all project images into your <code>.csv</code> file.</li>
+</ul></li>
+</ol>
+</div>
+<div id="required-columns-in-qupath-export" class="section level3">
+<h3>Required Columns in QuPath Export</h3>
+<p>Make sure the <code>columnsToInclude</code> array in the Groovy
+script always starts with <code>&quot;Image&quot;</code> and
+<code>&quot;Name&quot;</code>:</p>
+<ul>
+<li><code>Image</code>: The full image name (including the series
+number, e.g., <code>(series 01)</code>), which
+<code>string_parsing()</code> uses to extract experimental
+metadata.</li>
+<li><code>Name</code>: The QuPath object classification assigned to each
+segmented cell (for example, <code>&quot;PathCellObject&quot;</code>,
+<code>&quot;cCasp3&quot;</code>, <code>&quot;EpCAM_E-Cadherin&quot;</code>).</li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="filename-naming-convention" class="section level2">
+<h2>2. Filename Naming Convention</h2>
+<p><code>string_parsing()</code> splits the <code>Image</code> string on
+underscores (<code>_</code>) and applies pattern matching for dates,
+concentrations, and series numbers. Follow this template when naming
+your microscopy files or QuPath project entries:</p>
+<pre class="text"><code>&lt;PID&gt;_&lt;TISSUE&gt;_&lt;EXP_DATE&gt;_DOC&lt;SAMPLE_DATE&gt;_&lt;TREATMENT&gt;_&lt;CONC1&gt;_&lt;UNIT1&gt;_&lt;REP&gt;_&lt;MARKERS&gt;_(series XX).tif</code></pre>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Position / Pattern</th>
+<th align="left">Extracted Column</th>
+<th align="left">Description &amp; Formatting Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Field 1 (<code>&lt;PID&gt;</code>)</td>
+<td align="left"><code>PID</code></td>
+<td align="left">Patient or model identifier (e.g., <code>B39</code>,
+<code>A8759</code>). Avoid underscores inside the ID.</td>
+</tr>
+<tr class="even">
+<td align="left">Field 2 (<code>&lt;TISSUE&gt;</code>)</td>
+<td align="left"><code>Tissue</code></td>
+<td align="left">Tissue source (e.g., <code>Ascites</code>,
+<code>p.wash</code>, <code>Spleen</code>).</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>YYYY-MM-DD</code> or <code>YYYY.MM.DD</code></td>
+<td align="left"><code>Date1</code></td>
+<td align="left">Date of imaging/experiment (e.g.,
+<code>2024-02-13</code> or <code>2023.11.10</code>).</td>
+</tr>
+<tr class="even">
+<td align="left"><code>DOC&lt;YYYY-MM-DD&gt;</code></td>
+<td align="left"><code>DOC</code></td>
+<td align="left">Date of sample collection prefixed by <code>DOC</code>
+(e.g., <code>DOC2023-10-05</code>).</td>
+</tr>
+<tr class="odd">
+<td align="left">Field 5 (<code>&lt;TREATMENT&gt;</code>)</td>
+<td align="left"><code>Treatment</code></td>
+<td align="left">Drug name, combination name, or control label
+(<code>Control</code>, <code>dmso</code>, <code>ctrl</code>).</td>
+</tr>
+<tr class="even">
+<td align="left"><code>&lt;CONC1&gt;_&lt;UNIT1&gt;</code></td>
+<td align="left"><code>Concentration1</code>,
+<code>ConcentrationUnits1</code></td>
+<td align="left">Numeric dose followed by <code>_</code> and unit
+(<code>uM</code>, <code>nM</code>, <code>mM</code>,
+<code>pM</code>).</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>&lt;CONC2&gt;_&lt;UNIT2&gt;</code></td>
+<td align="left"><code>Concentration2</code>,
+<code>ConcentrationUnits2</code></td>
+<td align="left">Second drug dose and unit (used only for two-drug
+combinations).</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Rep</code> / <code>Replica</code></td>
+<td align="left"><code>ReplicaOrNot</code></td>
+<td align="left">Any token matching <code>Rep</code> or
+<code>Replica</code> (case-insensitive) marks the row as
+<code>&quot;Replica&quot;</code>.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>series XX</code></td>
+<td align="left"><code>Image_number</code></td>
+<td align="left">Confocal z-stack or field-of-view series identifier
+(e.g., <code>series 01</code>).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="examples-single-drugs-combinations-and-controls" class="section level2">
+<h2>3. Examples: Single Drugs, Combinations, and Controls</h2>
+<p>You can verify how <code>drugsens</code> will parse your filenames
+before running a full batch import by passing a small test
+<code>data.frame</code> to <code>string_parsing()</code>:</p>
+<div id="single-drug-treatment" class="section level3">
+<h3>Single-Drug Treatment</h3>
+<p>For a single drug, use a single capitalized word (or lowercase) in
+Field 5 followed by <code>&lt;CONC&gt;_&lt;UNIT&gt;</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>single_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">Image =</span> <span class="st">&quot;B39_Ascites_2024-03-15_DOC2024-03-01_Niraparib_1000_nM_Rep_EpCAM_Ecad_cCasp3_(series 01).tif&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>parsed_single <span class="ot">&lt;-</span> <span class="fu">string_parsing</span>(single_df)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>parsed_single[, <span class="fu">c</span>(<span class="st">&quot;PID&quot;</span>, <span class="st">&quot;Tissue&quot;</span>, <span class="st">&quot;Date1&quot;</span>, <span class="st">&quot;DOC&quot;</span>, <span class="st">&quot;Treatment&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                  <span class="st">&quot;Concentration1&quot;</span>, <span class="st">&quot;ConcentrationUnits1&quot;</span>, <span class="st">&quot;Treatment_complete&quot;</span>)]</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;   PID  Tissue      Date1        DOC Treatment Concentration1</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 1 B39 Ascites 2024-03-15 2024-03-01 Niraparib           1000</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;   ConcentrationUnits1 Treatment_complete</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 1                  nM    Niraparib1000nM</span></span></code></pre></div>
+</div>
+<div id="two-drug-combination-camelcase-convention" class="section level3">
+<h3>Two-Drug Combination (<code>CamelCase</code> Convention)</h3>
+<p>When testing a combination of two drugs, concatenate both drug names
+in <strong>CamelCase</strong> in Field 5 (exactly two or more uppercase
+letters, such as <code>CarboplatinPaclitaxel</code> or
+<code>GentamicinePaclitaxel</code>), followed by
+<code>&lt;CONC1&gt;_&lt;UNIT1&gt;_&lt;CONC2&gt;_&lt;UNIT2&gt;</code>:</p>
+<ul>
+<li>Field 6 = <code>Concentration1</code> (belongs to the first
+drug)</li>
+<li>Field 7 = <code>ConcentrationUnits1</code></li>
+<li>Field 8 = <code>Concentration2</code> (belongs to the second
+drug)</li>
+<li>Field 9 = <code>ConcentrationUnits2</code></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>combo_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">Image =</span> <span class="st">&quot;B38_Ascites_2024-03-15_DOC2024-03-01_CarboplatinPaclitaxel_100_uM_10_nM_Rep_EpCAM_cCasp3_(series 02).tif&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>parsed_combo <span class="ot">&lt;-</span> <span class="fu">string_parsing</span>(combo_df)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>parsed_combo[, <span class="fu">c</span>(<span class="st">&quot;PID&quot;</span>, <span class="st">&quot;Treatment&quot;</span>, <span class="st">&quot;Concentration1&quot;</span>, <span class="st">&quot;ConcentrationUnits1&quot;</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>                 <span class="st">&quot;Concentration2&quot;</span>, <span class="st">&quot;ConcentrationUnits2&quot;</span>, <span class="st">&quot;Treatment_complete&quot;</span>)]</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;   PID             Treatment Concentration1 ConcentrationUnits1 Concentration2</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 1 B38 CarboplatinPaclitaxel            100                  uM             10</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;   ConcentrationUnits2              Treatment_complete</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 1                  nM CarboplatinPaclitaxel100uM-10nM</span></span></code></pre></div>
+</div>
+<div id="vehicle-untreated-controls" class="section level3">
+<h3>Vehicle / Untreated Controls</h3>
+<p>When Field 5 is <code>&quot;Control&quot;</code>, <code>&quot;ctrl&quot;</code>,
+<code>&quot;dmso&quot;</code>, or <code>&quot;original&quot;</code> (case-insensitive),
+<code>Treatment_complete</code> is kept clean without appending
+<code>NA</code> concentration strings:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>ctrl_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">Image =</span> <span class="st">&quot;B516_Ascites_2023-11-25_DOC2020-12-14_Control_rep_Ecad_cCasp3_(series 01).tif&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>parsed_ctrl <span class="ot">&lt;-</span> <span class="fu">string_parsing</span>(ctrl_df)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>parsed_ctrl[, <span class="fu">c</span>(<span class="st">&quot;PID&quot;</span>, <span class="st">&quot;Tissue&quot;</span>, <span class="st">&quot;Treatment&quot;</span>, <span class="st">&quot;ReplicaOrNot&quot;</span>, <span class="st">&quot;Treatment_complete&quot;</span>)]</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;    PID  Tissue Treatment ReplicaOrNot Treatment_complete</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; 1 B516 Ascites   Control      Replica            Control</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="customizing-marker-relabeling-make_run_config" class="section level2">
+<h2>4. Customizing Marker Relabeling
+(<code>make_run_config()</code>)</h2>
+<p>QuPath classifiers often export raw object class names such as
+<code>&quot;PathCellObject&quot;</code> (for cells positive only for nuclear DAPI)
+or composite classifier strings like
+<code>&quot;E-Cadherin: cCASP3&quot;</code>.</p>
+<p><code>make_run_config()</code> creates a
+<code>config_drugsens.txt</code> file in <code>tempdir()</code> (or
+<code>forcePath</code> when provided) defining
+<code>list_of_relabeling</code>, a named list mapping raw QuPath
+<code>Name</code> strings to clean marker names, and loads it into the
+package’s internal configuration environment without modifying
+<code>.GlobalEnv</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>cfg_dir <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">make_run_config</span>(<span class="at">overwrite_config =</span> <span class="cn">TRUE</span>, <span class="at">forcePath =</span> cfg_dir)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">readLines</span>(<span class="fu">file.path</span>(cfg_dir, <span class="st">&quot;config_drugsens.txt&quot;</span>)), <span class="at">sep =</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; # List of markers to relabel</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;         list_of_relabeling =</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt;         list(</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;             &quot;PathCellObject&quot; = &quot;onlyDAPIPositve&quot;,</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt;             &quot;cCasp3&quot; = &quot;cCASP3&quot;,</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;             &quot;E-Cadherin: cCASP3&quot; = &quot;E-Cadherin and cCASP3&quot;,</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;             &quot;EpCAM_E-Cadherin&quot; = &quot;E-Cadherin&quot;,</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;             &quot;EpCAM_E-Cadherin and cCASP3&quot; = &quot;E-Cadherin and cCASP3&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;           )</span></span></code></pre></div>
+<p>To customize marker names for your own staining panel:</p>
+<ol style="list-style-type: decimal">
+<li>Run
+<code>make_run_config(forcePath = &quot;path/to/your/project&quot;)</code>.</li>
+<li>Edit <code>config_drugsens.txt</code> in that directory to map your
+QuPath class names to concise marker names.</li>
+<li>Pass <code>forcePath = &quot;path/to/your/project&quot;</code> to
+<code>data_binding()</code> so your custom relabeling map is applied
+automatically as files are imported:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># 1. Create a dedicated config directory and write a custom config_drugsens.txt</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>custom_cfg_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">tempdir</span>(), <span class="st">&quot;custom_project_config&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">dir.create</span>(custom_cfg_dir, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">writeLines</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>    <span class="st">&quot;# Custom marker relabeling map&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    <span class="st">&quot;list_of_relabeling = list(&quot;</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>    <span class="st">&#39;  &quot;PathCellObject&quot; = &quot;Stromal_DAPI_only&quot;,&#39;</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>    <span class="st">&#39;  &quot;EpCAM_E-Cadherin: cCASP3&quot; = &quot;Early_Apoptotic_Tumor&quot;,&#39;</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>    <span class="st">&#39;  &quot;EpCAM_E-Cadherin&quot; = &quot;Viable_Tumor&quot;,&#39;</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>    <span class="st">&#39;  &quot;cCASP3&quot; = &quot;Late_Apoptotic&quot;&#39;</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>    <span class="st">&quot;)&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  ),</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  <span class="at">con =</span> <span class="fu">file.path</span>(custom_cfg_dir, <span class="st">&quot;config_drugsens.txt&quot;</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>)</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co"># 2. Pass forcePath to data_binding() so your custom config is loaded automatically</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>example_dir <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata/to_merge/&quot;</span>, <span class="at">package =</span> <span class="st">&quot;drugsens&quot;</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>custom_bound <span class="ot">&lt;-</span> <span class="fu">data_binding</span>(</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>  <span class="at">path_to_the_projects_folder =</span> example_dir,</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>  <span class="at">files_extension_to_look_for =</span> <span class="st">&quot;csv&quot;</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>  <span class="at">forcePath =</span> custom_cfg_dir</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>)</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co"># 3. Verify that the custom marker names are now in the Name column</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="fu">table</span>(custom_bound<span class="sc">$</span>Name)</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; Early_Apoptotic_Tumor        Late_Apoptotic     Stromal_DAPI_only </span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt;                  1720                  2659                  3664 </span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt;          Viable_Tumor </span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt;                  5247</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co"># Restore default config for subsequent sessions</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="fu">make_run_config</span>(<span class="at">overwrite_config =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

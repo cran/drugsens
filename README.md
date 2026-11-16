@@ -1,4 +1,8 @@
-![](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue)
+![](https://img.shields.io/badge/R-%3E%3D%204.2.0-blue)
+![](https://www.r-pkg.org/badges/version/drugsens)
+![](https://cranlogs.r-pkg.org/badges/last-month/drugsens)
+[![DOI](https://zenodo.org/badge/751272301.svg)](https://doi.org/10.5281/zenodo.14747762)
+
 
 # Overview
 
@@ -7,15 +11,26 @@ Here we include a QuPath&trade; script (the same that we regularly use) to run r
 This script should be placed into scripts manager within QuPath&trade;. We tested this code with previous versions of QuPath&trade;, but new versions should also be compatible.
 This package is complementary to the STAR protocol: [*Protocol for quantifying drug sensitivity in 3D patient-derived ovarian cancer models DOI: 10.1016/j.xpro.2024.103274*](https://doi.org/10.1016/j.xpro.2024.103274).
 
+## Documentation & Vignettes
+
+Full documentation, function references, and step-by-step tutorials are available on the [drugsens documentation site](https://flalom.github.io/drugsens/):
+
+- [Get Started with drugsens](https://flalom.github.io/drugsens/articles/drugsens.html)
+- [1. QuPath Setup & Filename Metadata Conventions](https://flalom.github.io/drugsens/articles/qupath-and-metadata.html)
+- [2. End-to-End Quality Control & Feature Inspection](https://flalom.github.io/drugsens/articles/quality-control-workflow.html)
+- [3. Cohort Normalization, Dose-Response Curves & Statistics](https://flalom.github.io/drugsens/articles/cohort-and-dose-response.html)
+
 # Installation
 
 ``` r
-devtools::install_git("https://git.scicore.unibas.ch/ovca-research/drugsens")
-# OR
-devtools::install_github("https://github.com/flalom/drugsens") # this is the GitLab's mirroring repo
+# Install from CRAN
+install.packages("drugsens")
+
+# Or install the latest development version from GitHub:
+devtools::install_github("flalom/drugsens")
 ```
 
-`devtools` is required to install drugsens. If `devtools` is not installed yet you can install it with:
+To install the development version from GitHub (optional), `devtools` is used; if not installed yet, you can install it with:
 
 ``` r
 # Install devtools from CRAN
@@ -26,10 +41,19 @@ install.packages("devtools")
 pak::pak("r-lib/devtools")
 ```
 
-You can have a look at it [devtools](https://github.com/r-lib/devtools)
+You can have a look at [devtools](https://github.com/r-lib/devtools).
 
-### QuPath script
-__This is the script used in the STAR protocol, regarding the QuPath imaging analysis.__
+### QuPath scripts
+
+__1. Cell Detection & Object Classification Script (STAR Protocol)__
+
+To add and run this script in the latest versions of **QuPath (v0.4 / v0.5+)**:
+
+1. Open your QuPath project and go to the top menu bar: **`Automate` $\rightarrow$ `Show script editor`** (or press `Ctrl + [` on Windows/Linux, `Cmd + [` on macOS).
+2. In the Script Editor window, click **`File` $\rightarrow$ `New`** and paste the Groovy script below (tip: you can also save it inside your QuPath project's `scripts/` folder via **`File` $\rightarrow$ `Save As...`** so it is always accessible under **`Automate` $\rightarrow$ `Project scripts`**).
+3. Update `<USER_DEFINED_PATH>` and the `<...>` metadata placeholders, and confirm that the channel names (`DAPI`, `E-Cadherin`, `Cleaved Caspase 3`) and single-measurement classifiers match your project.
+4. To test on the currently open image, click **`Run` $\rightarrow$ `Run`** (`Ctrl + R` / `Cmd + R`). To process the entire project in batch, select **`Run` $\rightarrow$ `Run for project`** in the Script Editor menu bar, move your images to the **Selected** column, and click **OK**.
+
 ``` groovy
 
 /**
@@ -75,7 +99,7 @@ setImageType('FLUORESCENCE');
 setChannelNames ('DAPI', 'E-Cadherin', 'Cleaved Caspase 3')
 
 def name = getProjectEntry().getImageName() + '.txt'
-path = buildFilePath(path, '<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>')
+path = buildFilePath(path, '<PID>_<TISSUE>_<YYYY-MM-DD>_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>')
 mkdirs(path)
 path = buildFilePath(path, name)
 
@@ -96,7 +120,15 @@ saveAnnotationMeasurements(path)
 print 'Results exported to ' + path
 ```
 
-And this script for exporting the data:
+__2. Measurement Export Script (Exporting to `.csv`)__
+
+Once cell detection and classification have finished across your project, use this second script to export the single-cell measurements into the `.csv` format expected by `drugsens`:
+
+1. In QuPath, go to **`Automate` $\rightarrow$ `Show script editor`**, then click **`File` $\rightarrow$ `New`** and paste the script below (or click **`File` $\rightarrow$ `Open...`** to load the `script_for_qupath.txt` file generated in R by `generate_qupath_script()`).
+2. Set `outputPath` to your desired destination path and filename following the `<PID>_<TISSUE>_...` naming convention, and verify `columnsToInclude` (make sure `"Image"` and `"Name"` are always included).
+3. In the Script Editor menu bar, click **`Run` $\rightarrow$ `Run`** (`Ctrl + R` / `Cmd + R`).
+
+   > **Note:** Click **`Run` $\rightarrow$ `Run`** (not `Run for project`), because `MeasurementExporter` automatically iterates through all images in `getProject().getImageList()` and exports them in one step.
 
 ``` groovy
 
@@ -114,7 +146,7 @@ import qupath.lib.objects.PathAnnotationObject
 import qupath.lib.objects.PathRootObject
 
 // Choose your *full* output path
-def outputPath = "<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
+def outputPath = "<USER_DEFINED_PATH>/<PID>_<TISSUE>_<YYYY-MM-DD>_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
 
 // Get the list of all images in the current project
 def project = getProject()
@@ -125,7 +157,7 @@ def separator = ","
 
 // Choose the columns that will be included in the export
 // Note: if 'columnsToInclude' is empty, all columns will be included
-def columnsToInclude = new String[]{"Image", "Name", "Class","Centroid X µm","Centroid Y µm","Nucleus: Area", "Nucleus: DAPI mean","Nucleus: E-Cadherin mean", "Nucleus: Cleaved Caspase 3 mean", "Cell: Area","Cell: E-Cadherin mean", "Cell: Cleaved Caspase 3 mean","Cytoplasm: E-Cadherin mean","Cytoplasm: Cleaved Caspase 3 mean","Nucleus/Cell area ratio"}
+def columnsToInclude = new String[]{"Image", "Name", "Class","Centroid X um","Centroid Y um","Nucleus: Area", "Nucleus: DAPI mean","Nucleus: E-Cadherin mean", "Nucleus: Cleaved caspase 3 mean", "Cell: Area","Cell: E-Cadherin mean", "Cell: Cleaved caspase 3 mean","Cytoplasm: E-Cadherin mean","Cytoplasm: Cleaved caspase 3 mean","Nucleus/Cell area ratio"}
 
 // Choose the type of objects that the export will process
 // Other possibilities include:
@@ -158,7 +190,7 @@ You can also set you working directory with `setwd()`.
 
 ### QuPath data in R
 
-To make the QuPath script locally available within the working directory, with the currents date:
+To generate the QuPath export script (`script_for_qupath.txt`) in `tempdir()` (or pass `output_dir = "."` to save it in your working directory):
 
 ``` r
 library("drugsens")
@@ -169,24 +201,22 @@ This function will generate a `script_for_qupath.txt` file with the code that on
 
 It is very important that the file naming structure of the QuPath's output is maintained for `drugsens` to work correctly.
 
-> 📝**NOTE** 
->The column `Image` must be present in the data for drugsens to parse the metadata correctly. Title style (This Is An Example) is fine, but if you have a drug combination refer to the formatting as described below [Handling drug combinations](#bind-qupath-files).
+> **Note:** The `Image` column must be present in the exported CSV for `drugsens` to parse experimental metadata. For two-drug combinations, follow the `CamelCase` convention described under [Bind QuPath files](#bind-qupath-files).
 
 ### Generate configuration file
-This command will generate a `config_drugsens.txt` that should be edited to include the names of the cell markers that have been used by the experimenter.
+This command will generate a `config_drugsens.txt` file in `tempdir()` (or in a custom project folder when `forcePath` is supplied) that can be edited to map raw QuPath marker names to clean names.
 In our case we replaced `"PathCellObject"` with `"onlyDAPIPositve"`.
 
 ``` r
 make_run_config()
 ```
-Once the file `config_drugsens.txt` has been modified; you can feed it back to `R`; this will be done automatically once you run `data_binding()`.
-Now the `list_of_relabeling` should be available in the R environment and it can be used by `drugsens` to work. `list_of_relabeling` is a named list that is required for relabeling the markers name, that is often not user friendly. 
-In case the markers naming doesn't need corrections/relabeling you can leave the `list_of_relabeling` unchanged (but one should still check it).
+Once `config_drugsens.txt` has been modified, `data_binding()` loads it automatically into the package configuration environment (pass `forcePath` if you stored `config_drugsens.txt` in a project directory). `list_of_relabeling` is a named list used to standardize raw QuPath marker names without polluting `.GlobalEnv`. 
+In case the markers naming doesn't need corrections/relabeling you can leave the default configuration unchanged.
 
-> 📝**NOTE** It is recommended having no spaces and using camelCase style for the **list of cell markers**:
+> **Note:** We recommend concise, space-free `camelCase` names for cell markers in `list_of_relabeling`:
 >
-> - Start the name with a lowercase letter.
-> - Do not include spaces or underscores between words.
+> - Start the marker name with a lowercase letter (for example, `onlyDAPIPositive` or `cCASP3`).
+> - Avoid spaces or underscores between words.
 > - Capitalize the first letter of each subsequent word.
 
 
@@ -204,11 +234,13 @@ The example data can be bound together with this command:
 bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens"), files_extension_to_look_for = "csv")
 ```
 You will be now able to `View(bind_data)`. You should see all the image stacks from the QuPath in one dataframe. This dataframe will have all the metadata parsed from the `Image` column value for every stack (image x) (this is the first column defined in the in `columnsToInclude` within the `script_for_qupath.txt`). 
-In this code snippets we show an example of mock data `unique(bind_data$PID)` with PIDs: `"A8759" "B36"   "B37", "B38", "B39"` and tissue `"Spleen", "p.wash", "Ascites", "Eye"``. You will have all the metadata in one go and also for drug combinations!
+In this code snippets we show an example of mock data `unique(bind_data$PID)` with PIDs: `"A8759" "B36"   "B37", "B38", "B39"` and tissue `"Spleen", "p.wash", "Ascites", "Eye"`. You will have all the metadata in one go and also for drug combinations!
 
-> ⚠️ **WARNING**: As long as you keep the formatting as the above examples. 
-The dates should also be in the format **yyy-mm-dd**. For the combinations of two drugs they should be written together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
-For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the strings into useful metadata. If some of the data is not present, you can use a `.` separated by `_`. If you need additional data parsing, please let us know by filing an issue on GitLab https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues.
+> **Warning:** Keep filenames aligned with the underscore-delimited template above:
+>
+> - **Dates:** Use `YYYY-MM-DD` (or `YYYY.MM.DD`), and prefix the sample collection date with `DOC` (e.g., `DOC2023-10-05`).
+> - **Two-drug combinations:** Concatenate both drug names in `CamelCase` with one capital letter per drug (e.g., `CarboplatinPaclitaxel_100_uM_10_nM`), where the first `<CONC>_<UNIT>` (`100_uM`) belongs to the first drug and the second (`10_nM`) belongs to the second drug.
+> - **Missing fields:** Use `.` separated by `_` if a metadata token is unavailable, or open an issue on [GitHub Issues](https://github.com/flalom/drugsens/issues) if you need custom filename rules.
 
 ### Counting the number of positiive cells for each marker in every image
 This function will take the previous step's generated dataframe and it will counts image by image (sum the markers of every stack) for every sample the number of marker occurrences. 
@@ -227,7 +259,7 @@ get_QC_plots_parsed_merged_data(bind_data,
                                 fill_color_variable = "Treatment_complete", 
                                 save_plots = TRUE)
 ```
-<img src="assets/QC_plot3.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
+<img src="man/figures/QC_plot3.png" alt="QC Plot example" title="QC Plot example" width="100%" style="max-width: 950px; height: auto;"/>
 <br>
 
 ### Making plotting-ready data
@@ -240,7 +272,7 @@ Visualizing the results of the previous steps is essential to asses your experim
 ``` r
 get_QC_plots(plotting_ready_dataframe, save_plots = TRUE, isolate_a_specific_patient = "B39")
 ```
-<img src="assets/QC_plot.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
+<img src="man/figures/QC_plot.png" alt="QC Plot example" title="QC Plot example" width="100%" style="max-width: 950px; height: auto;"/>
 <br>
 
 ## Run with user's data
@@ -254,10 +286,9 @@ A8759_p.wash_2020.11.10_DOC2001.10.05_compoundX34542_10000_uM_EpCAM_Ecad_cCasp3_
 That follows the structure suggested in the QuPath script
 
 ```         
-"<USER_DEFINED_PATH>/<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
+"<USER_DEFINED_PATH>/<PID>_<TISSUE>_<YYYY-MM-DD>_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
 ```
-> ⚠️ **WARNING**: It is highly recommended to follow the recommended naming structure to obtain the correct output. The dates should also be in the format **yyy-mm-dd**. For combinations of two drugs they should be written together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
-For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the string into useful metadata. If some of the data is not present, you can use a `.` separated by `_`.
+> **Warning:** Follow the field order above so `string_parsing()` assigns every token to the right column (`YYYY-MM-DD` dates, `CamelCase` for two-drug combinations such as `CarboplatinPaclitaxel_100_uM_10_nM`, and `.` as a placeholder for missing tokens). See the [QuPath & Metadata tutorial](https://flalom.github.io/drugsens/articles/qupath-and-metadata.html) for worked examples.
 
 ### Data Binding and Processing
 
@@ -275,7 +306,7 @@ bind_data <- data_binding(path_to_the_projects_folder = defined_path,
 files_extension_to_look_for = desired_file_extensions, recursive_search = FALSE)
 ```
 
-> 📝**NOTE**It is recommended to run `data_binding()` with `recursive_search = FALSE` in the case that the target folder has subfolders that belong to other projects that use other cell markers. 
+> **Note:** Set `recursive_search = FALSE` in `data_binding()` if your target directory contains subfolders from other projects or staining panels.
 
 Each file is read, and additional metadata is extracted. This will return a dataframe of all the csv files within the folder merged with some additional parsing, the metadata is parsed from the file name will be retrieved and appended to the data. Metadata such as:
 
@@ -296,14 +327,14 @@ Each file is read, and additional metadata is extracted. This will return a data
 plots <- get_QC_plots_parsed_merged_data(bind_data, 
 fill_color_variable = "Treatment_complete", save_plots = TRUE)
 ``` 
-<img src="assets/QC_plot1.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
+<img src="man/figures/QC_plot1.png" alt="QC Plot example" title="QC Plot example" width="100%" style="max-width: 950px; height: auto;"/>
 <br>
-This plots shows the ratio of expressed markers in the various conditions, other variables (for `example Tissues` or `Treatment_complete`) can also be used. The data will be, by default, be saved in the current working directory in a folder called `figures` and will make subfolders for each PID present in the dataset.
+This plot shows the ratio of expressed markers across the various conditions; other variables (for example `Tissue` or `Treatment_complete`) can also be used. When `save_plots = TRUE` and `saving_plots_folder = NULL`, files are saved in `file.path(tempdir(), "drugsens_plots")` with subfolders for each PID present in the dataset.
 
 - `.data`: The main dataset, expected to be a dataframe that has been preprocessed and formatted into a long format.
 - `list_of_columns_to_plot`: Specifies which columns in the data should be visualized. Defaults to all numeric columns if not provided.
 - `save_plots`: A boolean flag indicating whether the plots should be saved as files.
-- `saving_plots_folder`: The directory where plot files will be saved, with "figures" as the default.
+- `saving_plots_folder`: The directory where plot files will be saved, defaulting to `file.path(tempdir(), "drugsens_plots")` when `NULL`.
 - `fill_color_variable`: Specifies a variable in the data to use for color-coding the plots, enhancing the visual distinction between different data groups.
 - `PID_column_name`, isolate_specific_drug, isolate_specific_patient: Parameters allowing for the isolation of data based on patient ID or specific treatment, facilitating targeted analysis.
 - `drug_column_name`: Defines the column that indicates the treatment or drug, with "Treatment" as the default.
@@ -321,7 +352,7 @@ cell_markers_counts_data <- make_count_dataframe(bind_data)
 - `unique_name_row_identifier`: The name of the column in .data that contains unique identifiers for each row (default is "filter_image").
 - `name_of_the_markers_column`: The name of the column in .data that contains the names of the markers (default is "Name").
 
-> 📝**NOTE** `make_count_dataframe()` accepts directly the `bind_data` generated in the previous step, unless the fiels were modified, in that case the paramenters `unique_name_row_identifier` and `name_of_the_markers_column` should be passed to the function.
+> **Note:** `make_count_dataframe()` accepts `bind_data` directly with default settings. If you renamed the image identifier or marker column, pass your custom column names via `unique_name_row_identifier` and `name_of_the_markers_column`.
 
 The data output will be a dataframe, with all the metadata coming from the previous preprocessing. At this point, you can you the data already, but you can additionally change the format from wider to longer. This is useful especially for plotting and more fine analysis.
 
@@ -338,7 +369,7 @@ plotting_format <- change_data_format_to_longer(cell_markers_counts_data)
 ```
 
 
-> 📝**NOTE** `change_data_format_to_longer()` accepts directly the `cell_markers_counts_data` generated in the previous step, unless the fiels were modified, in that case the paramenters `pattern_column_markers` and `unique_name_row_identifier` and `additional_columns` should be passed to the function.
+> **Note:** `change_data_format_to_longer()` accepts `cell_markers_counts_data` directly. If you customized the marker ratio suffix or image identifier column, specify `pattern_column_markers`, `unique_name_row_identifier`, or `additional_columns`.
 
 This will return a dataframe that can be easily used for plotting and additional analyses.
 
@@ -354,11 +385,33 @@ More parameters can be specified to personalize the plot(s).
 
 - `.data`: The preprocessed and merged dataframe, expected to be in a long format, typically obtained after processing through make_count_dataframe() and change_data_format_to_longer().
 - `patient_column_name`: Specifies the column in .data that contains patient identifiers (defaults to "PID").
-- `colors`: A vector of colors for the plots. Defaults to c("darkgreen", "red", "orange", "pink").
+- `colors`: A vector of colors for the plots. Defaults to `unname(drugsens_palette)` (an 8-color CVD-safe palette).
 - `save_plots`: A Boolean flag indicating whether to save the generated plots. If TRUE, plots are saved in the specified directory.
-- `folder_name`: The name of the folder where plots will be saved if save_plots is TRUE. Defaults to "figures".
+- `folder_name`: The directory where plots will be saved if `save_plots = TRUE`. Defaults to `file.path(tempdir(), "figures")` when `NULL`.
 - `isolate_a_specific_patient`: If specified, QC plots will be generated for this patient only. Defaults to NULL, meaning plots will be generated for all patients.
 - `x_plot_var`: The variable to be used on the x-axis, typically indicating different treatments. Defaults to "Treatment_complete".
+
+### Normalize to control and compare before/after
+
+Once you have plotting-ready data, `normalize_to_control()` expresses every marker value as a percentage of the mean control (vehicle/untreated) value, per patient. This is the standard first step before building dose response curves.
+
+``` r
+normalized <- normalize_to_control(plotting_format)
+```
+
+- `control_treatment_name`: The value in `treatment_column_name` that identifies control/vehicle wells. Defaults to "Control".
+- `group_by_columns`: Columns that define a comparable batch; the control mean is computed within each combination of these columns. Defaults to "PID".
+
+`plot_normalization_before_after()` then shows the raw ratio next to the normalized percent-of-control value, one pair of panels per marker, so you can see at a glance what normalization did to the data:
+
+``` r
+plot_normalization_before_after(normalized)
+```
+
+<img src="man/figures/normalization_before_after.png" alt="Normalization before/after example" title="Normalization before/after example" width="100%" style="max-width: 950px; height: auto;"/>
+<br>
+
+From there, `plot_dose_response()`, `plot_dose_response_heatmap()`, `plot_treatment_summary()`, and `plot_patient_heatmap()` all build on the normalized data to give dose-response curves, treatment x concentration and patient x treatment overviews, and a ranked summary of the whole drug panel. See the [function reference](https://flalom.github.io/drugsens/reference/) for details on each.
 
 ## Contributing
 
@@ -386,6 +439,5 @@ Renv will automatically activate and install the necessary packages as specified
 </details>
 
 ### Reporting Issues
-If you encounter any bugs or have suggestions for improvements, please file an issue using our **GitLab Issue:** https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues. Be sure to include as much information as possible to help us understand and address the issue.
-**BugReports:** https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues
-Please make sure to file the issue in the GitLab repo as this one in GitHub is a forward-only mirror repo.
+If you encounter any bugs or have suggestions for improvements, please file an issue on **GitHub Issues:** https://github.com/flalom/drugsens/issues. Be sure to include as much information as possible to help us understand and address the issue.
+**BugReports:** https://github.com/flalom/drugsens/issues
